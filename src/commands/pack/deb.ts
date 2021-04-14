@@ -70,7 +70,7 @@ export default class PackDeb extends Command {
       const target: {platform: 'linux'; arch: Config.ArchTypes} = {platform: 'linux', arch}
       const versionedDebBase = `${config.bin}_${debVersion(buildConfig)}_${debArch(arch)}`
       const workspace = qq.join(buildConfig.tmp, 'apt', `${versionedDebBase}.apt`)
-      await qq.rm(workspace)
+      await qq.x(`sudo rm "${workspace}" -rf`);
       await qq.mkdirp([workspace, 'DEBIAN'])
       await qq.mkdirp([workspace, 'usr/bin'])
       await qq.mkdirp([workspace, 'usr/lib'])
@@ -79,8 +79,8 @@ export default class PackDeb extends Command {
       await qq.write([workspace, 'DEBIAN/control'], scripts.control(buildConfig, debArch(arch)))
       await qq.chmod([workspace, 'usr/lib', config.dirname, 'bin', config.bin], 0o755)
       await qq.x(`ln -s "../lib/${config.dirname}/bin/${config.bin}" "${workspace}/usr/bin/${config.bin}"`)
-      await qq.x(`chown -R root "${workspace}"`)
-      await qq.x(`chgrp -R root "${workspace}"`)
+      await qq.x(`sudo chown -R root "${workspace}"`)
+      await qq.x(`sudo chgrp -R root "${workspace}"`)
       await qq.x(`dpkg --build "${workspace}" "${qq.join(dist, `${versionedDebBase}.deb`)}"`)
     }
 
